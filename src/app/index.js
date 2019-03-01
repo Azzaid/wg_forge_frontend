@@ -1,4 +1,4 @@
-import jQuery from "jquery";
+import * as $ from "jquery";
 /**
  * we already have jquery in bootstrap dependencies. So I think its good idea to use it everywhere else
  */
@@ -6,19 +6,20 @@ import jQuery from "jquery";
 import getInfoTable from './components/InfoTable/index.js'
 
 function app () {
-  const $ = jQuery;
+  const mainTableWrapper = $("<table></table>").addClass("table");
   
   const handleFilterColumnChose = () => {};
   const handleSearchStringInput = () => {};
   const refillTable = () => {};
+  
   const createTable = () => {
-    const mainTableObj = $("<table></table>").addClass("table");
-    const infoTable = getInfoTable();
+    mainTableWrapper.append(getInfoTable());
   };
   
   $(document).ready(()=>{
     const appPlaceholder = $("#app");
-    appPlaceholder.append($('<button></button>').text('IBHTN_PENECK!!').addClass('btn btn-primary'));
+    createTable();
+    appPlaceholder.append(mainTableWrapper);
   });
 }
 
