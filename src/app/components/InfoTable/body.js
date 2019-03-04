@@ -1,13 +1,12 @@
 import * as $ from "jquery";
-import orders from '../../../../data/orders.json'
 
-export default function getBody () {
-  const ordersData = JSON.parse(orders);
-  
+import getRow from './row.js';
+
+export default function getBody (transactionsData, usersData, companiesData) {
   let tableBody = $("<tbody></tbody>");
-  
-  ordersData.forEach(order => {
-  
+
+  transactionsData.forEach(order => {
+    tableBody = tableBody.append(getRow(order, usersData, companiesData));
   });
   
   return tableBody;
