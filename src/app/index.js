@@ -13,12 +13,13 @@ import localCompaniesData from '../../data/companies.json'
 const SEARCHABLE_FIELDS = [''];
 
 function app () {
-  const mainTableWrapper = $("<table></table>").addClass("table table-striped");
   let ordersData = localTransactionsData;
   let filteredOrdersData = [...ordersData];
   let searchString = '';
   let orderInfoTable = '';
   let sortColumn = '';
+  let tableHolder = null;
+  let mainTableWrapper = null;
 
   const listToObj = list => {
     let obj = {};
@@ -34,8 +35,11 @@ function app () {
 
   
   const createTable = () => {
-    orderInfoTable = getInfoTable(filteredOrdersData, usersData, companiesData, sortTable, sortColumn);
-    mainTableWrapper.append(orderInfoTable);
+    if (mainTableWrapper) mainTableWrapper.remove();
+    mainTableWrapper = $("<table></table>").addClass("table table-striped");
+    mainTableWrapper.append(getInfoTable(filteredOrdersData, usersData, companiesData, sortTable, sortColumn));
+    mainTableWrapper.append(getSummaryTable(filteredOrdersData, usersData, companiesData));
+    tableHolder.append(mainTableWrapper);
   };
 
   const sortTable = field => {
@@ -68,7 +72,6 @@ function app () {
 //TODO filter results if searchstring is present?
       filteredOrdersData = [...ordersData];
       console.log('sorted', ordersData, filteredOrdersData);
-      orderInfoTable.remove();
       createTable();
     }
   };
@@ -78,9 +81,8 @@ function app () {
   const filterTable = () => {};
 
   $(document).ready(()=>{
-    const appPlaceholder = $("#app");
+    tableHolder = $("#app");
     createTable();
-    appPlaceholder.append(mainTableWrapper);
   });
 }
 
