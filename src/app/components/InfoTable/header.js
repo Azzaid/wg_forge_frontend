@@ -1,6 +1,8 @@
 import * as $ from "jquery";
 
-export default function getHeader (sortHandler, sortedBy) {
+import getSearchRow from './searchRow'
+
+export default function getHeader (sortHandler, sortedBy, handleSearchStringInput) {
   let tableHeader = $("<tr>");
   tableHeader.append(
     $("<th>Transaction ID</th>").addClass("cursor-pointer").click(()=> {sortHandler('Transaction ID')}).append(
@@ -36,5 +38,5 @@ export default function getHeader (sortHandler, sortedBy) {
     )
   );
   
-  return $("<thead></thead>").addClass('thead-light').append(tableHeader);
+  return $("<thead></thead>").addClass('thead-light').append(getSearchRow(handleSearchStringInput)).append(tableHeader);
 }

@@ -1,7 +1,10 @@
 import getHeader from "./header";
 import getBody from "./body"
 
-export default function getInfoTable (transactionsData, usersData, companiesData, sortHandler, sortedBy) {
-  let infoTable = getHeader(sortHandler, sortedBy).add(getBody(transactionsData, usersData, companiesData));
- return infoTable;
+export function getTableHeader (sortHandler, sortedBy, handleSearchStringInput) {
+  return getHeader(sortHandler, sortedBy, handleSearchStringInput);
+};
+
+export function getInfoTable (transactionsData, usersData, companiesData) {
+ return getBody(transactionsData, usersData, companiesData);
 };

@@ -3,7 +3,7 @@ import * as $ from "jquery";
  * we already have jquery in bootstrap dependencies. So I think its good idea to use it everywhere else
  */
 
-import getInfoTable from './components/InfoTable'
+import { getInfoTable, getTableHeader} from './components/InfoTable'
 import getSummaryTable from './components/summaryTable'
 
 import localTransactionsData from '../../data/orders.json'
@@ -16,10 +16,11 @@ function app () {
   let ordersData = localTransactionsData;
   let filteredOrdersData = [...ordersData];
   let searchString = '';
-  let orderInfoTable = '';
   let sortColumn = '';
   let tableHolder = null;
-  let mainTableWrapper = null;
+  const mainTableWrapper = $("<table></table>").addClass("table table-striped");
+  let infoTable = null;
+  let summaryTable = null;
 
   const listToObj = list => {
     let obj = {};
@@ -35,11 +36,32 @@ function app () {
 
   
   const createTable = () => {
-    if (mainTableWrapper) mainTableWrapper.remove();
-    mainTableWrapper = $("<table></table>").addClass("table table-striped");
-    mainTableWrapper.append(getInfoTable(filteredOrdersData, usersData, companiesData, sortTable, sortColumn));
-    mainTableWrapper.append(getSummaryTable(filteredOrdersData, usersData, companiesData));
+    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData);
+    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData);
+    mainTableWrapper.append(getTableHeader(sortTable, sortColumn, handleSearchStringInput));
+    mainTableWrapper.append(infoTable);
+    mainTableWrapper.append(summaryTable);
     tableHolder.append(mainTableWrapper);
+  };
+
+  const refreshTable = () => {
+    infoTable.remove();
+    summaryTable.remove();
+    if (searchString) {
+      filteredOrdersData = ordersData.filter(filterTable)
+    } else {
+      filteredOrdersData = [...ordersData]
+    }
+
+    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData);
+    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData);
+    mainTableWrapper.append(infoTable);
+    mainTableWrapper.append(summaryTable);
+  };
+
+  const filterTable = order => {
+    let filterPassed = false;
+
   };
 
   const sortTable = field => {
@@ -69,16 +91,15 @@ function app () {
         }
       });
 
-//TODO filter results if searchstring is present?
-      filteredOrdersData = [...ordersData];
       console.log('sorted', ordersData, filteredOrdersData);
-      createTable();
+      refreshTable();
     }
   };
 
-  const handleSearchStringInput = () => {};
-
-  const filterTable = () => {};
+  const handleSearchStringInput = () => {
+    searchString = $("#search").val();
+    refreshTable();
+  };
 
   $(document).ready(()=>{
     tableHolder = $("#app");
