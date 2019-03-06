@@ -45,8 +45,28 @@ function app () {
   
   $(document).ready(()=>{
     tableHolder = $("#app");
+    loadCurrencyData();
     createTable();
   });
+  
+  const loadCurrencyData = () => {
+    $.getJSON('https://api.exchangeratesapi.io/latest', {}, (data) => {
+      console.log(data)
+    })
+      .then(()=>{console.log("A wish granted!")})
+  };
+  
+  const loadTableData = () => {
+    $.getJSON('http://localhost:9000/api/orders');
+    $.when(
+      $.getJSON('http://localhost:9000/api/orders'),
+      $.getJSON('http://localhost:9000/api/users'),
+      $.getJSON('http://localhost:9000/api/companies'),)
+      .then(
+        myFunc,
+        myFailure
+      );
+  };
 
   const sortTable = field => {
     if (field !== sortColumn) {
