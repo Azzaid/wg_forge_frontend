@@ -2,7 +2,7 @@ import * as $ from "jquery";
 
 export default function getCurrencyChooseSection (currencyRatesData, choosenCurrency) {
   let select = $("<select class=\"form-control\">").change(function() {
-    console.log("SELECTED", this.value());
+    console.log("SELECTED", select.val());
   });
   
   Object.keys(currencyRatesData).forEach(currencyAbbreviation => {
