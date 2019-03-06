@@ -5,6 +5,7 @@ import * as $ from "jquery";
 
 import { getInfoTable, getTableHeader} from './components/InfoTable'
 import getSummaryTable from './components/summaryTable'
+import getCurrencyChooseSection from './components/currencyChooseSection'
 
 import localTransactionsData from '../../data/orders.json'
 import localUsersData from '../../data/users.json'
@@ -23,6 +24,8 @@ function app () {
   const mainTableWrapper = $("<table></table>").addClass("table table-striped");
   let infoTable = null;
   let summaryTable = null;
+  let currencyRatesData = {};
+  let choosenCurrency = '';
   
   const listToObj = list => {
     let obj = {};
@@ -43,18 +46,18 @@ function app () {
     tableHolder.append(mainTableWrapper);
   };
   
-  $(document).ready(()=>{
-    tableHolder = $("#app");
-    loadCurrencyData();
-    createTable();
-  });
-  
   const loadCurrencyData = () => {
     $.getJSON('https://api.exchangeratesapi.io/latest', {}, (data) => {
-      console.log(data)
+      currencyRatesData = data.rates;
+      mainTableWrapper.append(getCurrencyChooseSection(currencyRatesData, choosenCurrency))
     })
-      .then(()=>{console.log("A wish granted!")})
   };
+  
+  $(document).ready(()=>{
+    tableHolder = $("#app");
+    createTable();
+    loadCurrencyData();
+  });
   
   const loadTableData = () => {
     $.getJSON('http://localhost:9000/api/orders');
