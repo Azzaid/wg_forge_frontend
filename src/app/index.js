@@ -10,7 +10,9 @@ import localTransactionsData from '../../data/orders.json'
 import localUsersData from '../../data/users.json'
 import localCompaniesData from '../../data/companies.json'
 
-const SEARCHABLE_FIELDS = [''];
+const SEARCHABLE_ORDER_FIELDS = ["transaction_id", "total", "order_country", "order_ip", "card_type"];
+
+const SEARCHABLE_USER_FIELDS = ["first_name", "last_name"];
 
 function app () {
   let ordersData = localTransactionsData;
@@ -21,7 +23,7 @@ function app () {
   const mainTableWrapper = $("<table></table>").addClass("table table-striped");
   let infoTable = null;
   let summaryTable = null;
-
+  
   const listToObj = list => {
     let obj = {};
     list.forEach(listEntry => {
@@ -29,11 +31,8 @@ function app () {
     });
     return obj
   };
-
   let usersData = listToObj(localUsersData);
   let companiesData = listToObj(localCompaniesData);
-
-
   
   const createTable = () => {
     infoTable = getInfoTable(filteredOrdersData, usersData, companiesData);
@@ -43,33 +42,16 @@ function app () {
     mainTableWrapper.append(summaryTable);
     tableHolder.append(mainTableWrapper);
   };
-
-  const refreshTable = () => {
-    infoTable.remove();
-    summaryTable.remove();
-    if (searchString) {
-      filteredOrdersData = ordersData.filter(filterTable)
-    } else {
-      filteredOrdersData = [...ordersData]
-    }
-
-    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData);
-    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData);
-    mainTableWrapper.append(infoTable);
-    mainTableWrapper.append(summaryTable);
-  };
-
-  const filterTable = order => {
-    let filterPassed = false;
-
-  };
+  
+  $(document).ready(()=>{
+    tableHolder = $("#app");
+    createTable();
+  });
 
   const sortTable = field => {
     if (field !== sortColumn) {
       sortColumn = field;
-
-      console.log('unsorted', ordersData, filteredOrdersData);
-
+      
       ordersData = ordersData.sort((a, b) => {
         switch (field) {
           case 'Transaction ID':
@@ -90,21 +72,42 @@ function app () {
             }
         }
       });
-
-      console.log('sorted', ordersData, filteredOrdersData);
       refreshTable();
     }
+  };
+  
+  const refreshTable = () => {
+    infoTable.remove();
+    summaryTable.remove();
+    if (searchString) {
+      filteredOrdersData = ordersData.filter(filterTable)
+    } else {
+      filteredOrdersData = [...ordersData]
+    }
+    
+    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData);
+    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData);
+    mainTableWrapper.append(infoTable);
+    mainTableWrapper.append(summaryTable);
   };
 
   const handleSearchStringInput = () => {
     searchString = $("#search").val();
     refreshTable();
   };
-
-  $(document).ready(()=>{
-    tableHolder = $("#app");
-    createTable();
-  });
+  
+  const filterTable = order => {
+    let filterPassed = false;
+    SEARCHABLE_ORDER_FIELDS.forEach(fieldName => {
+      console.log(order, fieldName);
+      if (order[fieldName].toLowerCase().includes(searchString.toLowerCase())) filterPassed = true;
+    });
+  
+    SEARCHABLE_USER_FIELDS.forEach(fieldName => {
+      if (usersData[order.user_id][fieldName].toLowerCase().includes(searchString.toLowerCase())) filterPassed = true;
+    });
+    return filterPassed;
+  };
 }
 
 export default app;
