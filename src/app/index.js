@@ -38,37 +38,57 @@ function app () {
   let companiesData = listToObj(localCompaniesData);
   
   const createTable = () => {
-    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData);
-    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData);
+    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData, currencyRatesData, choosenCurrency);
+    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData, currencyRatesData, choosenCurrency);
     mainTableWrapper.append(getTableHeader(sortTable, sortColumn, handleSearchStringInput));
-    mainTableWrapper.append(infoTable);
-    mainTableWrapper.append(summaryTable);
+    mainTableWrapper.append(infoTable.append(summaryTable));
     tableHolder.append(mainTableWrapper);
   };
   
-  const loadCurrencyData = () => {
-    $.getJSON('https://api.exchangeratesapi.io/latest', {}, (data) => {
-      currencyRatesData = data.rates;
-      mainTableWrapper.append(getCurrencyChooseSection(currencyRatesData, choosenCurrency))
-    })
+  const refreshTable = () => {
+    infoTable.remove();
+    summaryTable.remove();
+    
+    if (searchString) {
+      filteredOrdersData = ordersData.filter(filterTable)
+    } else {
+      filteredOrdersData = [...ordersData]
+    }
+    
+    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData, currencyRatesData, choosenCurrency);
+    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData, currencyRatesData, choosenCurrency);
+    mainTableWrapper.append(infoTable);
+    mainTableWrapper.append(summaryTable);
   };
   
-  $(document).ready(()=>{
-    tableHolder = $("#app");
-    createTable();
-    loadCurrencyData();
-  });
-  
   const loadTableData = () => {
-    $.getJSON('http://localhost:9000/api/orders');
     $.when(
       $.getJSON('http://localhost:9000/api/orders'),
       $.getJSON('http://localhost:9000/api/users'),
       $.getJSON('http://localhost:9000/api/companies'),)
       .then(
-        myFunc,
-        myFailure
+        (onlineOrdersData, onlineUsersData, onlineCompaniesData) => {
+          ordersData = onlineOrders;
+          filteredOrdersData = [...ordersData];
+          sortColumn = '';
+          searchString = '';
+          
+          usersData = listToObj(onlineUsersData);
+          companiesData = listToObj(onlineCompaniesData);
+  
+          refreshTable();
+        },
+        () => {
+          console.log('Failed to get one of data files, staying on local data.')
+        }
       );
+  };
+  
+  const loadCurrencyData = () => {
+    $.getJSON('https://api.exchangeratesapi.io/latest', {}, (data) => {
+      currencyRatesData = data.rates;
+      mainTableWrapper.append(getCurrencyChooseSection(currencyRatesData, choosenCurrency, handleCurrencySelect))
+    })
   };
 
   const sortTable = field => {
@@ -99,30 +119,25 @@ function app () {
     }
   };
   
-  const refreshTable = () => {
-    infoTable.remove();
-    summaryTable.remove();
-    if (searchString) {
-      filteredOrdersData = ordersData.filter(filterTable)
-    } else {
-      filteredOrdersData = [...ordersData]
-    }
-    
-    infoTable = getInfoTable(filteredOrdersData, usersData, companiesData);
-    summaryTable = getSummaryTable(filteredOrdersData, usersData, companiesData);
-    mainTableWrapper.append(infoTable);
-    mainTableWrapper.append(summaryTable);
-  };
-
   const handleSearchStringInput = () => {
     searchString = $("#search").val();
     refreshTable();
   };
   
+  const handleCurrencySelect = currencyAbbreviation => {
+    if (currencyAbbreviation !== choosenCurrency) {
+      if (currencyAbbreviation === "USD") {
+        choosenCurrency = '';
+      } else {
+        choosenCurrency = currencyAbbreviation;
+      }
+      refreshTable();
+    }
+  };
+  
   const filterTable = order => {
     let filterPassed = false;
     SEARCHABLE_ORDER_FIELDS.forEach(fieldName => {
-      console.log(order, fieldName);
       if (order[fieldName].toLowerCase().includes(searchString.toLowerCase())) filterPassed = true;
     });
   
@@ -131,6 +146,13 @@ function app () {
     });
     return filterPassed;
   };
+  
+  $(document).ready(()=>{
+    tableHolder = $("#app");
+    createTable();
+    loadCurrencyData();
+    loadTableData();
+  });
 }
 
 export default app;

@@ -5,6 +5,6 @@ export function getTableHeader (sortHandler, sortedBy, handleSearchStringInput) 
   return getHeader(sortHandler, sortedBy, handleSearchStringInput);
 };
 
-export function getInfoTable (transactionsData, usersData, companiesData) {
- return getBody(transactionsData, usersData, companiesData);
+export function getInfoTable (transactionsData, usersData, companiesData, currencyRatesData, choosenCurrency) {
+ return getBody(transactionsData, usersData, companiesData, currencyRatesData, choosenCurrency);
 };
